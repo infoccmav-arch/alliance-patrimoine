@@ -25,7 +25,12 @@ function canadianMonthlyRate(annualRate) {
 
 // ── Slider Input ─────────────────────────────────────────────────────────────
 function SliderField({ label, value, onChange, min, max, step, prefix, suffix, hint }) {
+  const [raw, setRaw] = useState(String(value));
   const pct = ((value - min) / (max - min)) * 100;
+
+  // Sync raw when slider changes
+  const handleSlider = (v) => { onChange(v); setRaw(String(v)); };
+
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
@@ -34,14 +39,21 @@ function SliderField({ label, value, onChange, min, max, step, prefix, suffix, h
           style={{ background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.25)' }}>
           {prefix && <span className="text-amber-400">{prefix}</span>}
           <input
-            type="number"
-            value={value}
-            onChange={e => {
-              const v = parseFloat(e.target.value);
-              if (!isNaN(v)) onChange(Math.min(max, Math.max(min, v)));
+            type="text"
+            inputMode="decimal"
+            value={raw}
+            onChange={e => setRaw(e.target.value)}
+            onBlur={() => {
+              const v = parseFloat(raw);
+              if (!isNaN(v)) {
+                const clamped = Math.min(max, Math.max(min, v));
+                onChange(clamped);
+                setRaw(String(clamped));
+              } else {
+                setRaw(String(value));
+              }
             }}
             className="w-24 bg-transparent text-right outline-none text-white font-bold"
-            style={{ colorScheme: 'dark' }}
           />
           {suffix && <span className="text-amber-400">{suffix}</span>}
         </div>
@@ -51,7 +63,7 @@ function SliderField({ label, value, onChange, min, max, step, prefix, suffix, h
           style={{ width: `${pct}%`, background: 'linear-gradient(90deg, #b45309, #f59e0b)' }} />
         <input
           type="range" min={min} max={max} step={step} value={value}
-          onChange={e => onChange(parseFloat(e.target.value))}
+          onChange={e => handleSlider(parseFloat(e.target.value))}
           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
         />
         <div className="absolute w-4 h-4 rounded-full -top-1 -translate-x-1/2 transition-all"
