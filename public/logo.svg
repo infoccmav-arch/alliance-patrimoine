@@ -1,0 +1,189 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" fill="none">
+  <defs>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0d1f3c"/>
+      <stop offset="100%" stop-color="#070e1a"/>
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="50%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+    <linearGradient id="blueGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#60a5fa"/>
+      <stop offset="100%" stop-color="#1d4ed8"/>
+    </linearGradient>
+    <linearGradient id="skyline" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3b82f6"/>
+      <stop offset="100%" stop-color="#1e3a8a"/>
+    </linearGradient>
+    <linearGradient id="greenGrad" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+    <linearGradient id="divider" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#f59e0b" stop-opacity="0"/>
+      <stop offset="30%" stop-color="#f59e0b" stop-opacity="1"/>
+      <stop offset="70%" stop-color="#f59e0b" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#f59e0b" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="6" stdDeviation="12" flood-color="#000" flood-opacity="0.5"/>
+    </filter>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2.5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="goldGlow">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <clipPath id="circle-clip">
+      <circle cx="200" cy="200" r="193"/>
+    </clipPath>
+  </defs>
+
+  <!-- Background -->
+  <circle cx="200" cy="200" r="195" fill="url(#bgGrad)" filter="url(#shadow)"/>
+
+  <!-- Outer gold ring -->
+  <circle cx="200" cy="200" r="193" fill="none" stroke="url(#goldGrad)" stroke-width="3"/>
+  <!-- Inner subtle ring -->
+  <circle cx="200" cy="200" r="183" fill="none" stroke="#1e3a5f" stroke-width="1" opacity="0.4"/>
+
+  <!-- Sky gradient background for buildings -->
+  <rect x="7" y="7" width="386" height="386" rx="193" fill="none" clip-path="url(#circle-clip)"/>
+
+  <!-- === BUILDINGS === -->
+
+  <!-- Building far left (small) -->
+  <rect x="42" y="220" width="30" height="70" rx="2" fill="url(#skyline)" opacity="0.6"/>
+  <rect x="46" y="213" width="22" height="10" rx="1" fill="url(#skyline)" opacity="0.6"/>
+  <rect x="48" y="226" width="7" height="6" rx="1" fill="white" opacity="0.25"/>
+  <rect x="59" y="226" width="7" height="6" rx="1" fill="white" opacity="0.25"/>
+  <rect x="48" y="238" width="7" height="6" rx="1" fill="white" opacity="0.25"/>
+  <rect x="59" y="238" width="7" height="6" rx="1" fill="white" opacity="0.25"/>
+
+  <!-- Building left -->
+  <rect x="78" y="196" width="42" height="94" rx="2" fill="url(#skyline)" opacity="0.8"/>
+  <rect x="83" y="186" width="32" height="14" rx="2" fill="url(#skyline)" opacity="0.8"/>
+  <rect x="85" y="204" width="9" height="9" rx="1" fill="white" opacity="0.35"/>
+  <rect x="100" y="204" width="9" height="9" rx="1" fill="white" opacity="0.35"/>
+  <rect x="85" y="219" width="9" height="9" rx="1" fill="white" opacity="0.35"/>
+  <rect x="100" y="219" width="9" height="9" rx="1" fill="white" opacity="0.35"/>
+  <rect x="85" y="234" width="9" height="9" rx="1" fill="white" opacity="0.25"/>
+  <rect x="100" y="234" width="9" height="9" rx="1" fill="white" opacity="0.25"/>
+  <rect x="85" y="249" width="9" height="9" rx="1" fill="white" opacity="0.15"/>
+  <rect x="100" y="249" width="9" height="9" rx="1" fill="white" opacity="0.15"/>
+
+  <!-- Building CENTER (tallest — flagship) -->
+  <rect x="130" y="138" width="58" height="152" rx="3" fill="url(#skyline)"/>
+  <rect x="136" y="126" width="46" height="16" rx="2" fill="url(#skyline)"/>
+  <!-- Gold crown/triangle on top -->
+  <polygon points="159,96 148,126 170,126" fill="url(#goldGrad)" filter="url(#goldGlow)"/>
+  <rect x="155" y="104" width="8" height="24" rx="1" fill="url(#goldGrad)" opacity="0.5"/>
+  <!-- Gold cap -->
+  <rect x="147" y="122" width="24" height="6" rx="1" fill="url(#goldGrad)"/>
+  <!-- Windows center -->
+  <rect x="137" y="144" width="11" height="11" rx="1" fill="white" opacity="0.5"/>
+  <rect x="155" y="144" width="11" height="11" rx="1" fill="white" opacity="0.5"/>
+  <rect x="173" y="144" width="11" height="11" rx="1" fill="white" opacity="0.5"/>
+  <rect x="137" y="162" width="11" height="11" rx="1" fill="white" opacity="0.5"/>
+  <rect x="155" y="162" width="11" height="11" rx="1" fill="white" opacity="0.5"/>
+  <rect x="173" y="162" width="11" height="11" rx="1" fill="white" opacity="0.5"/>
+  <rect x="137" y="180" width="11" height="11" rx="1" fill="white" opacity="0.4"/>
+  <rect x="155" y="180" width="11" height="11" rx="1" fill="white" opacity="0.4"/>
+  <rect x="173" y="180" width="11" height="11" rx="1" fill="white" opacity="0.4"/>
+  <rect x="137" y="198" width="11" height="11" rx="1" fill="white" opacity="0.3"/>
+  <rect x="155" y="198" width="11" height="11" rx="1" fill="white" opacity="0.3"/>
+  <rect x="173" y="198" width="11" height="11" rx="1" fill="white" opacity="0.3"/>
+  <rect x="137" y="216" width="11" height="11" rx="1" fill="white" opacity="0.2"/>
+  <rect x="173" y="216" width="11" height="11" rx="1" fill="white" opacity="0.2"/>
+  <!-- Door -->
+  <rect x="149" y="264" width="20" height="26" rx="2" fill="#060d1a"/>
+
+  <!-- Building right medium -->
+  <rect x="199" y="172" width="48" height="118" rx="2" fill="url(#skyline)" opacity="0.9"/>
+  <rect x="204" y="162" width="38" height="14" rx="2" fill="url(#skyline)" opacity="0.9"/>
+  <rect x="205" y="179" width="10" height="10" rx="1" fill="white" opacity="0.4"/>
+  <rect x="222" y="179" width="10" height="10" rx="1" fill="white" opacity="0.4"/>
+  <rect x="205" y="196" width="10" height="10" rx="1" fill="white" opacity="0.4"/>
+  <rect x="222" y="196" width="10" height="10" rx="1" fill="white" opacity="0.4"/>
+  <rect x="205" y="213" width="10" height="10" rx="1" fill="white" opacity="0.3"/>
+  <rect x="222" y="213" width="10" height="10" rx="1" fill="white" opacity="0.3"/>
+  <rect x="205" y="230" width="10" height="10" rx="1" fill="white" opacity="0.2"/>
+  <rect x="222" y="230" width="10" height="10" rx="1" fill="white" opacity="0.2"/>
+  <rect x="205" y="247" width="10" height="10" rx="1" fill="white" opacity="0.1"/>
+  <rect x="222" y="247" width="10" height="10" rx="1" fill="white" opacity="0.1"/>
+
+  <!-- Building far right -->
+  <rect x="258" y="207" width="38" height="83" rx="2" fill="url(#skyline)" opacity="0.7"/>
+  <rect x="263" y="198" width="28" height="12" rx="1" fill="url(#skyline)" opacity="0.7"/>
+  <rect x="264" y="215" width="8" height="8" rx="1" fill="white" opacity="0.3"/>
+  <rect x="278" y="215" width="8" height="8" rx="1" fill="white" opacity="0.3"/>
+  <rect x="264" y="229" width="8" height="8" rx="1" fill="white" opacity="0.3"/>
+  <rect x="278" y="229" width="8" height="8" rx="1" fill="white" opacity="0.3"/>
+  <rect x="264" y="243" width="8" height="8" rx="1" fill="white" opacity="0.2"/>
+  <rect x="278" y="243" width="8" height="8" rx="1" fill="white" opacity="0.2"/>
+
+  <!-- Far right small -->
+  <rect x="304" y="228" width="28" height="62" rx="2" fill="url(#skyline)" opacity="0.5"/>
+  <rect x="307" y="220" width="22" height="11" rx="1" fill="url(#skyline)" opacity="0.5"/>
+
+  <!-- Ground line with gradient -->
+  <rect x="30" y="290" width="290" height="3" rx="1.5" fill="url(#goldGrad)" opacity="0.3"/>
+
+  <!-- Growth arrow (top right) -->
+  <polyline points="308,272 324,250 342,228 358,200" fill="none" stroke="url(#greenGrad)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)"/>
+  <polygon points="358,200 344,196 350,210" fill="#10b981" filter="url(#glow)"/>
+  <circle cx="308" cy="272" r="3.5" fill="#10b981" opacity="0.8"/>
+  <circle cx="324" cy="250" r="3.5" fill="#10b981" opacity="0.8"/>
+  <circle cx="342" cy="228" r="3.5" fill="#10b981" opacity="0.8"/>
+  <circle cx="358" cy="200" r="5" fill="#10b981" filter="url(#glow)"/>
+
+  <!-- Gold sparkles -->
+  <circle cx="340" cy="140" r="2.5" fill="#fbbf24" opacity="0.9" filter="url(#glow)"/>
+  <circle cx="355" cy="158" r="1.5" fill="#fbbf24" opacity="0.6"/>
+  <circle cx="325" cy="130" r="1.5" fill="#fbbf24" opacity="0.6"/>
+  <circle cx="360" cy="175" r="2" fill="#10b981" opacity="0.7"/>
+  <circle cx="52" cy="185" r="2" fill="#fbbf24" opacity="0.5"/>
+  <circle cx="38" cy="200" r="1.5" fill="#3b82f6" opacity="0.4"/>
+
+  <!-- === TEXT AREA === -->
+  <!-- Dark band for text -->
+  <rect x="20" y="305" width="360" height="72" rx="8" fill="#070e1a" opacity="0.7"/>
+
+  <!-- Thin gold line above text -->
+  <rect x="40" y="308" width="320" height="1.5" rx="1" fill="url(#divider)"/>
+
+  <!-- ALLIANCE -->
+  <text x="200" y="337" text-anchor="middle"
+        font-family="Georgia, 'Times New Roman', serif"
+        font-weight="700"
+        font-size="30"
+        letter-spacing="10"
+        fill="white">ALLIANCE</text>
+
+  <!-- Thin divider between words -->
+  <rect x="80" y="342" width="240" height="1" rx="0.5" fill="url(#goldGrad)" opacity="0.4"/>
+
+  <!-- PATRIMOINE -->
+  <text x="200" y="360" text-anchor="middle"
+        font-family="Georgia, 'Times New Roman', serif"
+        font-weight="400"
+        font-size="19"
+        letter-spacing="8"
+        fill="#f59e0b">PATRIMOINE</text>
+
+  <!-- INC. -->
+  <text x="200" y="374" text-anchor="middle"
+        font-family="Arial, sans-serif"
+        font-weight="300"
+        font-size="10"
+        letter-spacing="6"
+        fill="#475569">INC.</text>
+
+  <!-- Bottom gold line -->
+  <rect x="40" y="378" width="320" height="1.5" rx="1" fill="url(#divider)"/>
+
+</svg>

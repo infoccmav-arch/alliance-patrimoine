@@ -1,0 +1,26 @@
+{
+  "name": "Alliance Patrimoine Inc.",
+  "short_name": "Alliance",
+  "description": "Plateforme de gestion pour le groupe d'investissement Alliance Patrimoine Inc.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["finance", "productivity"],
+  "lang": "fr-CA"
+}
