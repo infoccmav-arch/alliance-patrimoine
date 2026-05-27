@@ -10,7 +10,7 @@ export default function GestionComptes({ membres, setMembres }) {
     const nom = u.nom || u.username;
     if (membres.some(m => m.nom?.toLowerCase() === nom.toLowerCase())) return;
     const newId = membres.length > 0 ? Math.max(...membres.map(m => m.id)) + 1 : 1;
-    setMembres(prev => [...prev, { id: newId, nom, cotisation: 750, creditScore: 700, role: 'Actionnaire', actif: true, totalCotise: 0 }]);
+    setMembres(prev => [...prev, { id: newId, nom, cotisation: 750, role: 'Actionnaire', actif: true, totalCotise: 0 }]);
   };
 
   const [showCreate, setShowCreate] = useState(false);
