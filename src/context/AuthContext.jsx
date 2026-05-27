@@ -28,7 +28,7 @@ function saveUsers(users) {
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
     try {
-      const s = sessionStorage.getItem('ig_session');
+      const s = localStorage.getItem('ig_session');
       return s ? JSON.parse(s) : null;
     } catch { return null; }
   });
@@ -48,7 +48,7 @@ export function AuthProvider({ children }) {
         return { ok: false, error: 'Votre demande a été refusée. Contactez l\'administrateur.' };
       const session = { ...found, password: undefined };
       setUser(session);
-      sessionStorage.setItem('ig_session', JSON.stringify(session));
+      localStorage.setItem('ig_session', JSON.stringify(session));
       return { ok: true };
     }
     return { ok: false, error: 'Identifiant ou mot de passe incorrect.' };
@@ -56,7 +56,7 @@ export function AuthProvider({ children }) {
 
   const logout = () => {
     setUser(null);
-    sessionStorage.removeItem('ig_session');
+    localStorage.removeItem('ig_session');
   };
 
   // ── Self-registration — creates account with status: 'pending' ────────────
@@ -104,7 +104,7 @@ export function AuthProvider({ children }) {
     if (user?.id === id) {
       const updated = { ...user, ...data, password: undefined };
       setUser(updated);
-      sessionStorage.setItem('ig_session', JSON.stringify(updated));
+      localStorage.setItem('ig_session', JSON.stringify(updated));
     }
   };
 

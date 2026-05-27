@@ -334,8 +334,8 @@ function AppContent() {
         )}
 
         <PullToRefresh onRefresh={handleRefresh}>
-          <div className="flex-1 overflow-y-auto w-full" {...swipeHandlers}>
-            <div className="w-full max-w-lg mx-auto px-4 py-4 pb-36 md:pb-10">
+          <div {...swipeHandlers}>
+            <div className="w-full max-w-lg mx-auto px-4 py-4 pb-32 md:pb-10">
               <PageTransition tabKey={tab}><PageContent /></PageTransition>
             </div>
           </div>
