@@ -2,8 +2,17 @@ import { useState } from 'react';
 import { UserPlus, Key, Trash2, Shield, Eye, EyeOff, Check, X, AlertCircle, Clock, CheckCircle2, UserX } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
-export default function GestionComptes({ membres }) {
+export default function GestionComptes({ membres, setMembres }) {
   const { user, users, pendingUsers, createUser, approveUser, rejectUser, deleteUser, changePassword } = useAuth();
+
+  const autoAddMembre = (u) => {
+    if (!setMembres) return;
+    const nom = u.nom || u.username;
+    if (membres.some(m => m.nom?.toLowerCase() === nom.toLowerCase())) return;
+    const newId = membres.length > 0 ? Math.max(...membres.map(m => m.id)) + 1 : 1;
+    setMembres(prev => [...prev, { id: newId, nom, cotisation: 750, creditScore: 700, role: 'Actionnaire', actif: true, totalCotise: 0 }]);
+  };
+
   const [showCreate, setShowCreate] = useState(false);
   const [showChangePwd, setShowChangePwd] = useState(null); // userId
   const [newUser, setNewUser] = useState({ username: '', password: '', membreId: '', isAdmin: false });
@@ -106,7 +115,7 @@ export default function GestionComptes({ membres }) {
                 </div>
                 <div className="flex items-center gap-1.5">
                   <button
-                    onClick={() => { approveUser(u.id); showMsg('success', `Compte de ${u.nom || u.username} approuvé ✓`); }}
+                    onClick={() => { approveUser(u.id); autoAddMembre(u); showMsg('success', `Compte de ${u.nom || u.username} approuvé ✓`); }}
                     className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold transition active:scale-95"
                     style={{ background: 'rgba(0,208,132,0.1)', border: '1px solid rgba(0,208,132,0.2)', color: '#00d084' }}>
                     <CheckCircle2 className="w-3.5 h-3.5" /> Approuver

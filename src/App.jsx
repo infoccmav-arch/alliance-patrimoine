@@ -166,7 +166,7 @@ function AppContent() {
     if (tab==='calculatrice') return <Calculatrice />;
     if (tab==='documents')    return <Documents   documents={documents} setDocuments={setDocuments} />;
     if (tab==='profil')       return <Profil      membres={membres} transactions={transactions} proprietes={proprietes} capital={capital} />;
-    if (tab==='comptes')      return <GestionComptes membres={membres} />;
+    if (tab==='comptes')      return <GestionComptes membres={membres} setMembres={setMembres} />;
     if (tab==='plan') {
       if (!user.isAdmin) return (
         <div className="flex flex-col items-center justify-center py-24 gap-4">
