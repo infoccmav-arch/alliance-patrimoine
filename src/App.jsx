@@ -3,6 +3,7 @@ import {
   LayoutDashboard, Building2, CheckSquare, MessageCircle,
   Calculator, LogOut, Shield, ChevronRight,
   FileText, Wallet, User, FileDown, Search,
+  WifiOff, Wifi, CloudUpload,
 } from 'lucide-react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import LoginPage       from './components/LoginPage';
@@ -28,6 +29,7 @@ import PullToRefresh   from './components/PullToRefresh';
 import { useSwipe }    from './hooks/useSwipe';
 import { haptic }      from './utils/haptic';
 import { useSharedData }   from './hooks/useSharedData';
+import { useOfflineQueue, getQueueSize } from './hooks/useOfflineQueue';
 import { isSupabaseReady } from './lib/supabase';
 import { initialMembers }  from './data/initialData';
 import './index.css';
@@ -39,6 +41,69 @@ const ALL_TABS = [
   { id:'discussion',   label:'Chat',     icon:MessageCircle,   adminOnly:false },
   { id:'plan',         label:'Plan',     icon:CheckSquare,     adminOnly:true  },
 ];
+
+// ── Offline / sync status banner ────────────────────────────────────────────
+function ConnectionBanner() {
+  const [online,    setOnline]    = useState(navigator.onLine);
+  const [syncing,   setSyncing]   = useState(false);
+  const [pending,   setPending]   = useState(getQueueSize);
+  const [showSync,  setShowSync]  = useState(false);
+  const { flush } = useOfflineQueue();
+
+  useEffect(() => {
+    const onOnline  = () => { setOnline(true); setPending(getQueueSize()); };
+    const onOffline = () => { setOnline(false); };
+    window.addEventListener('online',  onOnline);
+    window.addEventListener('offline', onOffline);
+
+    const onFlushed = (e) => {
+      setPending(e.detail.remaining);
+      setSyncing(false);
+      if (e.detail.remaining === 0) {
+        setShowSync(true);
+        setTimeout(() => setShowSync(false), 3000);
+      }
+    };
+    window.addEventListener('ig-queue-flushed', onFlushed);
+
+    return () => {
+      window.removeEventListener('online',  onOnline);
+      window.removeEventListener('offline', onOffline);
+      window.removeEventListener('ig-queue-flushed', onFlushed);
+    };
+  }, [flush]);
+
+  // Show offline banner
+  if (!online) return (
+    <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-center gap-2 px-4 py-2 text-xs font-bold"
+      style={{ background: 'rgba(239,68,68,0.92)', backdropFilter: 'blur(8px)', color: 'white' }}>
+      <WifiOff className="w-3.5 h-3.5" />
+      Hors ligne — modifications sauvegardées localement
+      {pending > 0 && <span className="ml-1 px-1.5 py-0.5 rounded-full text-[10px]" style={{ background: 'rgba(0,0,0,0.25)' }}>{pending} en attente</span>}
+    </div>
+  );
+
+  // Show sync success briefly
+  if (showSync) return (
+    <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-center gap-2 px-4 py-2 text-xs font-bold fade-up"
+      style={{ background: 'rgba(0,208,132,0.9)', backdropFilter: 'blur(8px)', color: 'white' }}>
+      <Wifi className="w-3.5 h-3.5" />
+      Synchronisation complète — toutes les données sont à jour
+    </div>
+  );
+
+  // Show pending writes badge (top-right) when online but queue not empty
+  if (pending > 0 && isSupabaseReady) return (
+    <div className="fixed top-3 right-4 z-50 flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[10px] font-bold cursor-pointer"
+      style={{ background: 'rgba(245,158,11,0.9)', color: 'white', boxShadow: '0 2px 12px rgba(0,0,0,0.4)' }}
+      onClick={() => { setSyncing(true); flush(); }}>
+      <CloudUpload className="w-3 h-3" />
+      {syncing ? 'Sync…' : `${pending} en attente`}
+    </div>
+  );
+
+  return null;
+}
 
 function PageTransition({ tabKey, children }) {
   const [key, setKey] = useState(tabKey);
@@ -184,6 +249,7 @@ function AppContent() {
 
   return (
     <div className="min-h-screen flex" style={{ background:'#000' }}>
+      <ConnectionBanner />
       <ConfettiCanvas />
       <ToastContainer />
       <SearchModal open={showSearch} onClose={()=>setSearch(false)} membres={membres} proprietes={proprietes} transactions={transactions} documents={documents} onNavigate={navigate} />
