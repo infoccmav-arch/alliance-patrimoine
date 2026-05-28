@@ -333,26 +333,46 @@ export default function Dashboard({ membres, proprietes, franchises, capital, tr
 
       {/* Members breakdown */}
       <div className="fade-up">
-        <SectionLabel label="Contributions membres" />
+        <SectionLabel label="Richesse par membre" />
         <div className="rounded-2xl overflow-hidden" style={{ background:'#0d0d0d',border:'1px solid rgba(255,255,255,0.05)' }}>
+          {/* Header */}
+          <div className="flex items-center px-4 py-2.5" style={{ borderBottom:'1px solid rgba(255,255,255,0.05)', background:'rgba(255,255,255,0.02)' }}>
+            <p className="flex-1 text-[10px] font-bold uppercase tracking-widest" style={{ color:'#3a3a3a' }}>Membre</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest w-24 text-right" style={{ color:'#3a3a3a' }}>Part actuelle</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest w-24 text-right" style={{ color:'#3a3a3a' }}>Valeur estimée</p>
+          </div>
           {membres.filter(m=>m.actif).map((m,i,arr)=>{
             const isMe = monMembre && String(monMembre.id)===String(m.id);
+            const totalCotis = arr.reduce((s,mb)=>s+(+mb.cotisation||0),0);
+            const partPct = totalCotis>0 ? ((+m.cotisation||0)/totalCotis)*100 : (1/arr.length)*100;
+            const valeurPart = totalPort * (partPct/100);
+            // Projection 10 ans: portefeuille × 3 × part
+            const proj10ans = totalPort > 0 ? valeurPart * 3 : (+(m.cotisation||0)*12*10*(partPct/100));
             return (
-              <div key={m.id} className="flex items-center gap-3 px-4 py-3" style={{ borderBottom:i<arr.length-1?'1px solid rgba(255,255,255,0.04)':'none', background:isMe?'rgba(0,208,132,0.03)':'transparent' }}>
-                <div className="w-7 h-7 rounded-full flex items-center justify-center text-black text-xs font-black flex-shrink-0" style={{ background:isMe?'#00d084':'linear-gradient(135deg,#f59e0b,#fbbf24)' }}>{m.nom.charAt(0)}</div>
+              <div key={m.id} className="flex items-center gap-3 px-4 py-3.5" style={{ borderBottom:i<arr.length-1?'1px solid rgba(255,255,255,0.04)':'none', background:isMe?'rgba(0,208,132,0.03)':'transparent' }}>
+                <div className="w-8 h-8 rounded-full flex items-center justify-center text-black text-xs font-black flex-shrink-0" style={{ background:isMe?'#00d084':'linear-gradient(135deg,#f59e0b,#fbbf24)' }}>{m.nom.charAt(0)}</div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5">
-                    <p className="text-xs font-semibold truncate" style={{ color:isMe?'#00d084':'#aaa' }}>{m.nom}</p>
+                    <p className="text-sm font-semibold truncate" style={{ color:isMe?'#00d084':'#ddd' }}>{m.nom}</p>
                     {isMe && <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full" style={{ background:'rgba(0,208,132,0.1)',color:'#00d084' }}>Moi</span>}
                   </div>
+                  <p className="text-[10px] num" style={{ color:'#444' }}>{m.cotisation.toLocaleString('fr-CA')} $/mois</p>
                 </div>
-                <div className="text-right">
-                  <p className="text-xs font-bold num" style={{ color:'#aaa' }}>{m.cotisation.toLocaleString('fr-CA')} $/m</p>
-                  <p className="text-[10px] num" style={{ color:'#3a3a3a' }}>{totalM>0?((1/totalM)*100).toFixed(1):0}%</p>
+                <div className="w-24 text-right">
+                  <p className="text-xs font-bold num" style={{ color:'#f59e0b' }}>{partPct.toFixed(1)}%</p>
+                  <p className="text-[10px]" style={{ color:'#3a3a3a' }}>→ 10 ans: {proj10ans>=1000000?(proj10ans/1000000).toFixed(1)+'M$':(proj10ans/1000).toFixed(0)+'k$'}</p>
+                </div>
+                <div className="w-24 text-right">
+                  <p className="text-sm font-black num" style={{ color:isMe?'#00d084':'#fff' }}>{valeurPart>=1000000?(valeurPart/1000000).toFixed(2)+'M':(valeurPart/1000).toFixed(0)+'k'}$</p>
                 </div>
               </div>
             );
           })}
+          {/* Total */}
+          <div className="flex items-center px-4 py-3" style={{ borderTop:'1px solid rgba(255,255,255,0.07)', background:'rgba(255,255,255,0.02)' }}>
+            <p className="flex-1 text-xs font-bold" style={{ color:'#555' }}>Total portefeuille</p>
+            <p className="text-sm font-black num" style={{ color:'#00d084' }}>{totalPort>=1000000?(totalPort/1000000).toFixed(2)+'M$':(totalPort/1000).toFixed(0)+'k$'}</p>
+          </div>
         </div>
       </div>
 
