@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
-  TrendingUp, Building2, DollarSign, User, AlertCircle,
+  TrendingUp, Building2, User, AlertCircle, Star, Clock,
 } from 'lucide-react';
 import {
   AreaChart, Area, ResponsiveContainer, Tooltip,
@@ -16,6 +16,40 @@ const fmtCAD  = (v) => {
   return `${Math.round(v).toLocaleString('fr-CA')}$`;
 };
 const fmtFull = (v) => Math.round(v).toLocaleString('fr-CA', { style:'currency', currency:'CAD', maximumFractionDigits:0 });
+
+// ── Animated counter hook ────────────────────────────────────────────────────
+function useCountUp(target, duration = 1400) {
+  const [value, setValue] = useState(0);
+  const raf = useRef(null);
+  const start = useRef(null);
+  const from = useRef(0);
+
+  useEffect(() => {
+    from.current = 0;
+    start.current = null;
+    const animate = (ts) => {
+      if (!start.current) start.current = ts;
+      const elapsed = ts - start.current;
+      const progress = Math.min(elapsed / duration, 1);
+      // Ease out expo
+      const eased = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+      setValue(Math.round(from.current + (target - from.current) * eased));
+      if (progress < 1) raf.current = requestAnimationFrame(animate);
+    };
+    raf.current = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(raf.current);
+  }, [target, duration]);
+
+  return value;
+}
+
+// Animated number display
+function AnimNum({ value, format = 'full', duration = 1400 }) {
+  const animated = useCountUp(value, duration);
+  if (format === 'full') return <>{fmtFull(animated).replace('CA', '')}</>;
+  if (format === 'cad')  return <>{fmtCAD(animated)}</>;
+  return <>{animated.toLocaleString('fr-CA')}</>;
+}
 
 const projData = [
   {a:'A1',v:200000},{a:'A2',v:450000},{a:'A3',v:750000},{a:'A4',v:1200000},
@@ -58,31 +92,100 @@ function AssetRow({ icon, iconBg, label, sub, value, change, sparkData, isPositi
   );
 }
 
-function MonContrib({ membre, totalCapital, totalMembres }) {
-  const partPct = totalMembres > 0 ? (1/totalMembres)*100 : 0;
-  const partVal = totalMembres > 0 ? totalCapital/totalMembres : 0;
-  const prog    = Math.min(100, Math.round(((new Date().getMonth()+1)/12)*100));
+// ── Beautiful personal member card ───────────────────────────────────────────
+function CartePersonnelle({ membre, totalCapital, totalMembres, totalPort, membres }) {
+  const totalCotis = membres.filter(m=>m.actif).reduce((s,m)=>s+(+m.cotisation||0),0);
+  const partPct    = totalCotis > 0 ? ((+membre.cotisation||0)/totalCotis)*100 : (1/Math.max(totalMembres,1))*100;
+  const valeurPart = totalPort * (partPct / 100);
+  const proj5ans   = valeurPart * 8;
+  const proj10ans  = valeurPart * 18;
+  const prog       = Math.min(100, Math.round(((new Date().getMonth()+1)/12)*100));
+
+  // Mini bar chart for cotisation progress
+  const moisNom = new Date().toLocaleDateString('fr-CA', { month:'long', year:'numeric' });
+
   return (
-    <div className="rounded-2xl p-4 fade-up" style={{ background:'rgba(0,208,132,0.04)', border:'1px solid rgba(0,208,132,0.12)' }}>
-      <div className="flex items-center gap-2 mb-3">
-        <User className="w-3.5 h-3.5" style={{ color:'#00d084' }} strokeWidth={2} />
-        <p className="text-xs font-bold uppercase tracking-widest" style={{ color:'#00d084' }}>Ma contribution</p>
-      </div>
-      <div className="grid grid-cols-3 gap-3">
-        {[['Cotisation', fmtCAD(membre.cotisation)+'/m'],['Ma part', partPct.toFixed(1)+'%'],['Valeur part', fmtCAD(partVal)]].map(([l,v]) => (
-          <div key={l}>
-            <p className="text-[10px] font-semibold uppercase tracking-wide mb-1" style={{ color:'#3a3a3a' }}>{l}</p>
-            <p className="text-base font-black num" style={{ color: l==='Ma part'?'#00d084':'#fff' }}>{v}</p>
+    <div className="fade-up" style={{ position:'relative', overflow:'hidden' }}>
+      {/* Ambient glow */}
+      <div style={{ position:'absolute', top:-40, right:-40, width:160, height:160, borderRadius:'50%', background:'radial-gradient(circle, rgba(0,208,132,0.08) 0%, transparent 70%)', pointerEvents:'none' }} />
+
+      <div className="rounded-2xl p-5" style={{ background:'linear-gradient(135deg, rgba(0,208,132,0.06) 0%, rgba(0,208,132,0.02) 100%)', border:'1px solid rgba(0,208,132,0.15)' }}>
+
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-12 h-12 rounded-full flex items-center justify-center text-black font-black text-lg flex-shrink-0"
+            style={{ background:'linear-gradient(135deg,#00d084,#00b870)', boxShadow:'0 4px 16px rgba(0,208,132,0.3)' }}>
+            {membre.nom.charAt(0)}
           </div>
-        ))}
-      </div>
-      <div className="mt-3 pt-3" style={{ borderTop:'1px solid rgba(0,208,132,0.08)' }}>
-        <div className="flex justify-between mb-1.5">
-          <p className="text-[10px] font-semibold uppercase tracking-wide" style={{ color:'#3a3a3a' }}>Progression annuelle</p>
-          <p className="text-[10px] font-bold num" style={{ color:'#00d084' }}>{prog}%</p>
+          <div className="flex-1">
+            <p className="text-white font-bold text-base leading-tight">{membre.nom}</p>
+            <div className="flex items-center gap-2 mt-0.5">
+              <span className="text-[10px] font-black px-2 py-0.5 rounded-full" style={{ background:'rgba(0,208,132,0.12)', color:'#00d084' }}>
+                {membre.role || 'Actionnaire'}
+              </span>
+              <span className="text-[10px]" style={{ color:'#555' }}>• {moisNom}</span>
+            </div>
+          </div>
+          <div className="text-right">
+            <p className="text-[10px] font-semibold uppercase tracking-wide mb-0.5" style={{ color:'#3a3a3a' }}>Ma part</p>
+            <p className="text-xl font-black num" style={{ color:'#00d084' }}>{partPct.toFixed(1)}%</p>
+          </div>
         </div>
-        <div className="rounded-full overflow-hidden" style={{ height:2, background:'#1a1a1a' }}>
-          <div style={{ width:`${prog}%`, background:'#00d084', height:'100%', transition:'width 1s cubic-bezier(.16,1,.3,1)' }} />
+
+        {/* 3 main stats */}
+        <div className="grid grid-cols-3 gap-3 mb-5">
+          {[
+            { label:'Cotisation', value: fmtCAD(membre.cotisation), sub:'/mois', color:'#fff' },
+            { label:'Valeur actuelle', value: valeurPart < 1000 ? valeurPart.toFixed(0)+'$' : fmtCAD(valeurPart), sub:'de ta part', color:'#f59e0b' },
+            { label:'Total cotisé', value: fmtCAD(membre.totalCotise || 0), sub:'à vie', color:'#818cf8' },
+          ].map(({ label, value, sub, color }) => (
+            <div key={label} className="rounded-xl p-3 text-center" style={{ background:'rgba(0,0,0,0.25)', border:'1px solid rgba(255,255,255,0.05)' }}>
+              <p className="text-[9px] font-bold uppercase tracking-wider mb-1" style={{ color:'#444' }}>{label}</p>
+              <p className="text-sm font-black num leading-tight" style={{ color }}>{value}</p>
+              <p className="text-[9px] mt-0.5" style={{ color:'#333' }}>{sub}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Projection bar */}
+        <div className="rounded-xl p-3.5 mb-4" style={{ background:'rgba(0,0,0,0.2)', border:'1px solid rgba(255,255,255,0.04)' }}>
+          <div className="flex items-center gap-2 mb-3">
+            <TrendingUp className="w-3 h-3" style={{ color:'#00d084' }} />
+            <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color:'#00d084' }}>Projection de richesse</p>
+          </div>
+          <div className="flex items-center justify-between gap-3">
+            {[
+              { label:'Maintenant', value: valeurPart, color:'#555' },
+              { label:'5 ans', value: proj5ans, color:'#f59e0b' },
+              { label:'10 ans', value: proj10ans, color:'#00d084' },
+            ].map(({ label, value, color }, i) => (
+              <div key={i} className="flex-1 text-center">
+                <p className="text-[9px] font-semibold mb-1.5" style={{ color:'#444' }}>{label}</p>
+                <p className="text-xs font-black num" style={{ color }}>
+                  {value >= 1_000_000 ? `${(value/1_000_000).toFixed(1)}M$` : value >= 1000 ? `${(value/1000).toFixed(0)}k$` : `${Math.round(value)}$`}
+                </p>
+              </div>
+            ))}
+          </div>
+          {/* Visual arrow line */}
+          <div className="flex items-center gap-1 mt-3 px-4">
+            <div className="flex-1 rounded-full" style={{ height:2, background:'linear-gradient(90deg, #333, #f59e0b, #00d084)' }} />
+            <span style={{ color:'#00d084', fontSize:10 }}>→</span>
+          </div>
+        </div>
+
+        {/* Annual progress */}
+        <div>
+          <div className="flex justify-between mb-2">
+            <div className="flex items-center gap-1.5">
+              <Clock className="w-3 h-3" style={{ color:'#555' }} />
+              <p className="text-[10px] font-semibold uppercase tracking-wide" style={{ color:'#444' }}>Progression {new Date().getFullYear()}</p>
+            </div>
+            <p className="text-[10px] font-black num" style={{ color:'#00d084' }}>{prog}%</p>
+          </div>
+          <div className="rounded-full overflow-hidden" style={{ height:3, background:'#1a1a1a' }}>
+            <div style={{ width:`${prog}%`, background:'linear-gradient(90deg,#00b870,#00d084)', height:'100%', transition:'width 1.2s cubic-bezier(.16,1,.3,1)', boxShadow:'0 0 8px rgba(0,208,132,0.4)' }} />
+          </div>
         </div>
       </div>
     </div>
@@ -112,29 +215,6 @@ function SmartReminders({ membres, transactions }) {
       <p className="text-xs" style={{ color:'#888' }}>
         <span className="text-white font-semibold">{target.map(m=>m.nom.split(' ')[0]).join(', ')}</span>{' '}— {msg}
       </p>
-    </div>
-  );
-}
-
-function QuickActions({ onNavigate }) {
-  const actions = [
-    { icon:'🏠', label:'Propriété',  color:'#818cf8', tab:'proprietes'   },
-    { icon:'💰', label:'Finances',   color:'#00d084', tab:'finances'     },
-    { icon:'🧮', label:'Calculer',   color:'#f59e0b', tab:'calculatrice' },
-    { icon:'💬', label:'Discussion', color:'#60a5fa', tab:'discussion'   },
-  ];
-  return (
-    <div className="grid grid-cols-4 gap-2.5 fade-up">
-      {actions.map(a => (
-        <button key={a.tab} onClick={() => onNavigate?.(a.tab)}
-          className="flex flex-col items-center gap-2 py-3.5 rounded-2xl transition active:scale-90"
-          style={{ background:`${a.color}09`, border:`1px solid ${a.color}18` }}
-          onMouseEnter={e => e.currentTarget.style.background=`${a.color}15`}
-          onMouseLeave={e => e.currentTarget.style.background=`${a.color}09`}>
-          <span className="text-xl leading-none">{a.icon}</span>
-          <span className="text-[10px] font-bold" style={{ color:a.color }}>{a.label}</span>
-        </button>
-      ))}
     </div>
   );
 }
@@ -284,14 +364,27 @@ export default function Dashboard({ membres, proprietes, franchises, capital, tr
 
   return (
     <div className="space-y-7 pb-4">
-<SmartReminders membres={membres} transactions={transactions} />
-      {monMembre && <MonContrib membre={monMembre} totalCapital={capital} totalMembres={totalM} />}
 
-      {/* Portfolio header */}
+      <SmartReminders membres={membres} transactions={transactions} />
+
+      {/* Personal member card */}
+      {monMembre && (
+        <CartePersonnelle
+          membre={monMembre}
+          totalCapital={capital}
+          totalMembres={totalM}
+          totalPort={totalPort}
+          membres={membres}
+        />
+      )}
+
+      {/* ── Portfolio header with animated numbers ── */}
       <div className="fade-up">
         <p className="text-xs font-semibold uppercase tracking-[0.14em] mb-3" style={{ color:'#3a3a3a' }}>Valeur nette totale</p>
         <button onClick={()=>setShowChart(s=>!s)} className="w-full text-left">
-          <p className="text-5xl font-black text-white num tracking-tight leading-none">{fmtFull(totalPort).replace('CA','')}</p>
+          <p className="text-5xl font-black text-white num tracking-tight leading-none">
+            <AnimNum value={totalPort} format="full" duration={1600} />
+          </p>
           <div className="flex items-center gap-2 mt-2.5">
             <span className="text-sm font-bold num" style={{ color:'#00d084' }}>+{cotisation.toLocaleString('fr-CA')} $/mois</span>
             <span className="text-xs font-medium" style={{ color:'#3a3a3a' }}>· {totalM} membres actifs</span>
@@ -311,12 +404,21 @@ export default function Dashboard({ membres, proprietes, franchises, capital, tr
         </button>
       </div>
 
-      {/* Quick stats */}
+      {/* Quick stats with animated numbers */}
       <div className="grid grid-cols-3 gap-2 fade-up">
-        {[{label:'Cotis./mois',value:fmtCAD(cotisation),color:'#00d084'},{label:'Cashflow',value:fmtCAD(cashflow),color:cashflow>=0?'#00d084':'#ff4d4d'},{label:'Propriétés',value:proprietes.length,color:'#818cf8'}].map(s=>(
+        {[
+          { label:'Cotis./mois', value:cotisation,        color:'#00d084',  fmt:'cad'  },
+          { label:'Cashflow',    value:cashflow,          color:cashflow>=0?'#00d084':'#ff4d4d', fmt:'cad' },
+          { label:'Propriétés',  value:proprietes.length, color:'#818cf8',  fmt:'count'},
+        ].map(s=>(
           <div key={s.label} style={{ background:'#0d0d0d',border:'1px solid rgba(255,255,255,0.05)',borderRadius:14 }} className="px-3 py-3.5 text-center">
             <p className="text-xs font-medium" style={{ color:'#3a3a3a' }}>{s.label}</p>
-            <p className="text-base font-black num mt-1 tracking-tight" style={{ color:s.color }}>{s.value}</p>
+            <p className="text-base font-black num mt-1 tracking-tight" style={{ color:s.color }}>
+              {s.fmt==='count'
+                ? <AnimNum value={s.value} format="count" duration={800} />
+                : <AnimNum value={s.value} format="cad" duration={1200} />
+              }
+            </p>
           </div>
         ))}
       </div>
@@ -328,29 +430,33 @@ export default function Dashboard({ membres, proprietes, franchises, capital, tr
       {/* Asset list */}
       <div className="fade-up">
         <SectionLabel label="Portefeuille détaillé" />
-        {assets.length===0 ? <p className="py-10 text-center text-sm" style={{ color:'#3a3a3a' }}>Aucun actif pour l'instant.</p> : assets.map((a,i)=><AssetRow key={a.id} {...a} delay={i*30} />)}
+        {assets.length===0
+          ? <p className="py-10 text-center text-sm" style={{ color:'#3a3a3a' }}>Aucun actif pour l'instant.</p>
+          : assets.map((a,i)=><AssetRow key={a.id} {...a} delay={i*30} />)}
       </div>
 
       {/* Members breakdown */}
       <div className="fade-up">
         <SectionLabel label="Richesse par membre" />
         <div className="rounded-2xl overflow-hidden" style={{ background:'#0d0d0d',border:'1px solid rgba(255,255,255,0.05)' }}>
-          {/* Header */}
           <div className="flex items-center px-4 py-2.5" style={{ borderBottom:'1px solid rgba(255,255,255,0.05)', background:'rgba(255,255,255,0.02)' }}>
             <p className="flex-1 text-[10px] font-bold uppercase tracking-widest" style={{ color:'#3a3a3a' }}>Membre</p>
-            <p className="text-[10px] font-bold uppercase tracking-widest w-24 text-right" style={{ color:'#3a3a3a' }}>Part actuelle</p>
-            <p className="text-[10px] font-bold uppercase tracking-widest w-24 text-right" style={{ color:'#3a3a3a' }}>Valeur estimée</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest w-24 text-right" style={{ color:'#3a3a3a' }}>Part</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest w-24 text-right" style={{ color:'#3a3a3a' }}>Valeur</p>
           </div>
           {membres.filter(m=>m.actif).map((m,i,arr)=>{
             const isMe = monMembre && String(monMembre.id)===String(m.id);
             const totalCotis = arr.reduce((s,mb)=>s+(+mb.cotisation||0),0);
             const partPct = totalCotis>0 ? ((+m.cotisation||0)/totalCotis)*100 : (1/arr.length)*100;
             const valeurPart = totalPort * (partPct/100);
-            // Projection 10 ans: portefeuille × 3 × part
-            const proj10ans = totalPort > 0 ? valeurPart * 3 : (+(m.cotisation||0)*12*10*(partPct/100));
+            const proj10ans = totalPort > 0 ? valeurPart * 18 : (+(m.cotisation||0)*12*10*(partPct/100));
             return (
-              <div key={m.id} className="flex items-center gap-3 px-4 py-3.5" style={{ borderBottom:i<arr.length-1?'1px solid rgba(255,255,255,0.04)':'none', background:isMe?'rgba(0,208,132,0.03)':'transparent' }}>
-                <div className="w-8 h-8 rounded-full flex items-center justify-center text-black text-xs font-black flex-shrink-0" style={{ background:isMe?'#00d084':'linear-gradient(135deg,#f59e0b,#fbbf24)' }}>{m.nom.charAt(0)}</div>
+              <div key={m.id} className="flex items-center gap-3 px-4 py-3.5"
+                style={{ borderBottom:i<arr.length-1?'1px solid rgba(255,255,255,0.04)':'none', background:isMe?'rgba(0,208,132,0.03)':'transparent' }}>
+                <div className="w-8 h-8 rounded-full flex items-center justify-center text-black text-xs font-black flex-shrink-0"
+                  style={{ background:isMe?'#00d084':'linear-gradient(135deg,#f59e0b,#fbbf24)' }}>
+                  {m.nom.charAt(0)}
+                </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5">
                     <p className="text-sm font-semibold truncate" style={{ color:isMe?'#00d084':'#ddd' }}>{m.nom}</p>
@@ -360,18 +466,21 @@ export default function Dashboard({ membres, proprietes, franchises, capital, tr
                 </div>
                 <div className="w-24 text-right">
                   <p className="text-xs font-bold num" style={{ color:'#f59e0b' }}>{partPct.toFixed(1)}%</p>
-                  <p className="text-[10px]" style={{ color:'#3a3a3a' }}>→ 10 ans: {proj10ans>=1000000?(proj10ans/1000000).toFixed(1)+'M$':(proj10ans/1000).toFixed(0)+'k$'}</p>
+                  <p className="text-[10px]" style={{ color:'#3a3a3a' }}>→ 10a: {proj10ans>=1_000_000?(proj10ans/1_000_000).toFixed(1)+'M$':(proj10ans/1000).toFixed(0)+'k$'}</p>
                 </div>
                 <div className="w-24 text-right">
-                  <p className="text-sm font-black num" style={{ color:isMe?'#00d084':'#fff' }}>{valeurPart>=1000000?(valeurPart/1000000).toFixed(2)+'M':(valeurPart/1000).toFixed(0)+'k'}$</p>
+                  <p className="text-sm font-black num" style={{ color:isMe?'#00d084':'#fff' }}>
+                    {valeurPart>=1_000_000?(valeurPart/1_000_000).toFixed(2)+'M':(valeurPart/1000).toFixed(0)+'k'}$
+                  </p>
                 </div>
               </div>
             );
           })}
-          {/* Total */}
           <div className="flex items-center px-4 py-3" style={{ borderTop:'1px solid rgba(255,255,255,0.07)', background:'rgba(255,255,255,0.02)' }}>
             <p className="flex-1 text-xs font-bold" style={{ color:'#555' }}>Total portefeuille</p>
-            <p className="text-sm font-black num" style={{ color:'#00d084' }}>{totalPort>=1000000?(totalPort/1000000).toFixed(2)+'M$':(totalPort/1000).toFixed(0)+'k$'}</p>
+            <p className="text-sm font-black num" style={{ color:'#00d084' }}>
+              <AnimNum value={totalPort} format="cad" duration={1400} />
+            </p>
           </div>
         </div>
       </div>
@@ -398,7 +507,11 @@ export default function Dashboard({ membres, proprietes, franchises, capital, tr
       <div className="fade-up">
         <SectionLabel label="Objectifs" />
         <div className="space-y-2">
-          {[{label:'An 5 — 2M$',target:2_000_000,cf:'15k$/m'},{label:'An 7 — 5M$',target:5_000_000,cf:'35k$/m'},{label:'An 10 — 12M$',target:12_000_000,cf:'80k$/m'}].map(o=>{
+          {[
+            {label:'An 5 — 2M$',target:2_000_000,cf:'15k$/m'},
+            {label:'An 7 — 5M$',target:5_000_000,cf:'35k$/m'},
+            {label:'An 10 — 12M$',target:12_000_000,cf:'80k$/m'},
+          ].map(o=>{
             const p=Math.min(100,(totalPort/o.target)*100);
             return (
               <div key={o.label} className="flex items-center gap-4 py-3" style={{ borderBottom:'1px solid rgba(255,255,255,0.04)' }}>
@@ -417,6 +530,7 @@ export default function Dashboard({ membres, proprietes, franchises, capital, tr
           })}
         </div>
       </div>
+
     </div>
   );
 }
