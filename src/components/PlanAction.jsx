@@ -3,85 +3,99 @@ import { useState } from 'react';
 
 const planData = [
   {
-    phase: 'PHASE 1', titre: 'Structure légale', mois: 'Mois 1–3', color: 'blue',
+    phase: 'PHASE 1', titre: 'Lancer le Groupe 1', mois: 'Mois 1–6 (22 ans)', color: 'blue',
     taches: [
-      { id: 'p1t1', label: 'Réunion officielle des 10 membres', detail: 'Choisir les rôles : Gestionnaire, Trésorier, Chef chantier, Secrétaire' },
-      { id: 'p1t2', label: 'Créer la Holding Inc.', detail: 'Avocat corporatif ~2 000$ — Convention actionnaires signée' },
-      { id: 'p1t3', label: 'Ouvrir compte bancaire Desjardins entreprise', detail: 'Carte de crédit d\'entreprise également' },
-      { id: 'p1t4', label: 'Rencontrer un comptable CPA', detail: 'Structure fiscale optimale' },
-      { id: 'p1t5', label: 'Rencontrer un courtier hypothécaire commercial', detail: 'Comprendre vos options de financement' },
-      { id: 'p1t6', label: 'Ouvrir compte Home Depot / Rona contracteur', detail: 'Rabais sur les matériaux' },
-      { id: 'p1t7', label: 'Vérifier la cote de crédit de chaque membre', detail: 'Borrowell.com — gratuit' },
-      { id: 'p1t8', label: 'Commencer les cotisations mensuelles', detail: '750$/membre/mois minimum' },
+      { id: 'p1t1', label: 'Recruter 7 membres sérieux', detail: 'Personnes fiables, motivées — qualité > quantité' },
+      { id: 'p1t2', label: 'Cotisation 1 000$/membre/mois', detail: '7 membres = 7 000$/mois → 84 000$/an de capital' },
+      { id: 'p1t3', label: 'Ouvrir compte bancaire Desjardins conjoint', detail: 'Tous les membres signataires' },
+      { id: 'p1t4', label: 'Vérifier la cote de crédit de chaque membre', detail: 'Borrowell.com gratuit — viser 680+ pour les signataires hypothécaires' },
+      { id: 'p1t5', label: 'Rencontrer un courtier hypothécaire', detail: 'Desjardins ou courtier indépendant — comprendre votre capacité d\'emprunt' },
+      { id: 'p1t6', label: 'Ouvrir compte contracteur Home Depot / Rona', detail: 'Rabais matériaux avec tes gars de construction' },
+      { id: 'p1t7', label: 'Définir les rôles du groupe', detail: 'Toi = Président/Gestionnaire, Trésorier, Secrétaire' },
+      { id: 'p1t8', label: 'Entente écrite entre membres (notaire)', detail: '~1 500$ — Protège tout le monde si quelqu\'un veut sortir' },
     ]
   },
   {
-    phase: 'PHASE 2', titre: 'Trouver la 1ère propriété', mois: 'Mois 4–12', color: 'purple',
+    phase: 'PHASE 2', titre: '1ère Maison à Flipper', mois: 'Mois 7–10 (22–23 ans)', color: 'orange',
     taches: [
-      { id: 'p2t1', label: 'Visiter 40–60 propriétés ensemble', detail: 'Repentigny, Terrebonne, Mascouche, Saint-Jérôme' },
-      { id: 'p2t2', label: 'Obtenir une pré-autorisation hypothécaire', detail: 'Terme 2 ANS (pas 5 ans)' },
-      { id: 'p2t3', label: 'Analyser les chiffres de chaque propriété', detail: 'Prix, revenus, dépenses, cashflow net' },
-      { id: 'p2t4', label: 'Faire des offres agressives', detail: '10–15% sous le prix demandé' },
-      { id: 'p2t5', label: 'Acheter la 1ère propriété', detail: 'Mise de fonds 25%, réserve 15 000$ gardée' },
+      { id: 'p2t1', label: 'Chercher maison à rénover sur Rive-Sud ou Rive-Nord', detail: 'Longueuil, Brossard, Terrebonne, Repentigny — appréciation forte' },
+      { id: 'p2t2', label: 'Budget achat: 200 000–280 000$', detail: 'Maison cheap qui a besoin de travaux — personne d\'autre en veut' },
+      { id: 'p2t3', label: 'Mise de fonds 20%: ~45 000$', detail: 'Tiré des cotisations accumulées' },
+      { id: 'p2t4', label: 'Tes gars rénovent: cuisine, sdb, planchers, façade', detail: 'Coût matériaux ~25 000$ — main d\'œuvre = gratuit!' },
+      { id: 'p2t5', label: 'Revendre +60 000–80 000$ de profit', detail: 'Valeur après réno: 340 000–380 000$' },
+      { id: 'p2t6', label: 'Profit réinvesti dans la mise de fonds du triplex', detail: 'Ne pas distribuer — garder pour accélérer' },
     ]
   },
   {
-    phase: 'PHASE 3', titre: 'Rénovation DIY', mois: 'Mois 10–16', color: 'orange',
+    phase: 'PHASE 3', titre: '1er Triplex — Stratégie Résidentielle', mois: 'Mois 8–12 (23 ans)', color: 'purple',
     taches: [
-      { id: 'p3t1', label: 'Faire évaluer par électricien (obligatoire)', detail: 'Licence obligatoire au Québec' },
-      { id: 'p3t2', label: 'Faire évaluer par plombier', detail: 'Licence obligatoire au Québec' },
-      { id: 'p3t3', label: 'Budget matériaux max 25 000$', detail: 'Peinture, planchers, cuisine, salle de bain' },
-      { id: 'p3t4', label: 'Organiser les fins de semaine de chantier', detail: 'Samedi 8h–17h, Dimanche 8h–15h' },
-      { id: 'p3t5', label: 'Démolition → Drywall → Peinture → Planchers', detail: 'Dans cet ordre' },
-      { id: 'p3t6', label: 'Photos de progression chaque semaine', detail: 'Instagram/TikTok optionnel' },
-      { id: 'p3t7', label: 'Cuisine et salle de bain finaux', detail: 'Valeur ajoutée maximale' },
+      { id: 'p3t1', label: 'Chercher triplex à rénover Rive-Sud/Rive-Nord', detail: 'Budget 380 000–480 000$ — besoin de travaux = moins cher' },
+      { id: 'p3t2', label: 'Un membre habite dans le logement principal', detail: 'Mise de fonds 5% au lieu de 20% → économise 60 000$!' },
+      { id: 'p3t3', label: 'Mise de fonds 5%: ~20 000$', detail: 'Financement résidentiel = meilleur taux' },
+      { id: 'p3t4', label: 'Tes gars rénovent les 2 logements locatifs', detail: 'Loyers augmentés après réno' },
+      { id: 'p3t5', label: '2 loyers encaissés: ~2 600–3 200$/mois', detail: 'Couvre l\'hypothèque + génère cashflow' },
+      { id: 'p3t6', label: 'Membre renouvelle après 12 mois', detail: 'Peut déménager après 1 an — taux résidentiel conservé' },
     ]
   },
   {
-    phase: 'PHASE 4', titre: 'Refinancement BRRRR', mois: 'Mois 16–17', color: 'emerald',
+    phase: 'PHASE 4', titre: 'Refinancement BRRRR', mois: 'An 2 (23–24 ans)', color: 'emerald',
     taches: [
-      { id: 'p4t1', label: 'Demander une évaluation bancaire', detail: '~400$ — Nouvelle valeur après réno' },
-      { id: 'p4t2', label: 'Soumettre demande de refinancement à 80%', detail: 'Récupérer le capital investi' },
-      { id: 'p4t3', label: 'Recevoir les fonds dans le compte', detail: '30–45 jours après approbation' },
-      { id: 'p4t4', label: 'Réinvestir dans la 2e propriété', detail: 'RÉPÉTER le cycle BRRRR' },
+      { id: 'p4t1', label: 'Faire évaluer le triplex après rénovations', detail: '~400$ — nouvelle valeur 500 000–550 000$' },
+      { id: 'p4t2', label: 'Refinancement à 80% de la nouvelle valeur', detail: 'Récupère 60 000–80 000$ → ta mise de fonds revient!' },
+      { id: 'p4t3', label: 'Utiliser l\'argent récupéré pour 2e triplex', detail: 'Le cycle BRRRR recommence — argent infini théoriquement' },
+      { id: 'p4t4', label: 'Répéter pour chaque propriété du groupe', detail: 'Chaque membre peut habiter dans son propre triplex' },
     ]
   },
   {
-    phase: 'PHASE 5', titre: 'BRRRR × 3 propriétés', mois: 'An 2–3', color: 'teal',
+    phase: 'PHASE 5', titre: 'Incorporation + 3–4 Propriétés', mois: 'An 2–3 (24–25 ans)', color: 'teal',
     taches: [
-      { id: 'p5t1', label: '2ème propriété achetée et rénovée', detail: 'Même stratégie BRRRR' },
-      { id: 'p5t2', label: '3ème propriété — duplex ou triplex', detail: 'Budget 500 000–650 000$' },
-      { id: 'p5t3', label: 'Cashflow combiné 4 000–5 500$/mois', detail: 'Argent reste dans la compagnie' },
+      { id: 'p5t1', label: 'Incorporer Alliance Patrimoine Inc.', detail: 'Quand vous avez 2+ propriétés ou 100k$+ revenus — avocat corporatif ~2 500$' },
+      { id: 'p5t2', label: 'Toi: 20% des parts comme gestionnaire', detail: 'Juste compensation pour organiser le groupe' },
+      { id: 'p5t3', label: '2e triplex acheté et rénové', detail: 'Même stratégie — autre membre y habite' },
+      { id: 'p5t4', label: '3e propriété ou maison à flipper', detail: 'Alterner flip + garder pour maximiser cash et patrimoine' },
+      { id: 'p5t5', label: 'Cashflow combiné 4 000–6 000$/mois', detail: 'Reste dans la compagnie pour financer la suite' },
+      { id: 'p5t6', label: 'CPA consulté chaque trimestre', detail: 'Taux corporatif ~12% au Québec vs 37% personnel' },
     ]
   },
   {
-    phase: 'PHASE 6', titre: 'Immeuble à revenus', mois: 'An 4–5', color: 'blue',
+    phase: 'PHASE 6', titre: 'Lancer le Groupe 2', mois: 'An 3–4 (25–26 ans)', color: 'yellow',
     taches: [
-      { id: 'p6t1', label: 'Accumuler 200 000–300 000$ de mise de fonds', detail: 'Refinancements + cotisations + cashflow' },
-      { id: 'p6t2', label: 'Acheter immeuble 6–10 logements', detail: 'Prix 800 000–1 200 000$' },
-      { id: 'p6t3', label: 'Cashflow 5 000–8 000$/mois net', detail: 'Automatisé avec gestionnaire si besoin' },
+      { id: 'p6t1', label: 'Recruter 7 nouveaux membres pour Groupe 2', detail: 'Utilise l\'app pour gérer 2 groupes séparément' },
+      { id: 'p6t2', label: 'Même modèle: 1 000$/mois × 7 membres', detail: '+ 84 000$/an de capital additionnel' },
+      { id: 'p6t3', label: 'Toi = gestionnaire des 2 groupes', detail: 'Frais de gestion sur les 2 = double revenu pour toi' },
+      { id: 'p6t4', label: 'Portefeuille combiné: 6–8 propriétés', detail: 'Valeur 2.5–3.5M$' },
+      { id: 'p6t5', label: 'Les 2 groupes partagent tes gars de construction', detail: 'Économies d\'échelle maximales' },
     ]
   },
   {
-    phase: 'PHASE 7', titre: 'Première franchise', mois: 'An 5–6', color: 'yellow',
+    phase: 'PHASE 7', titre: 'Immeuble à revenus', mois: 'An 4–6 (26–28 ans)', color: 'blue',
     taches: [
-      { id: 'p7t1', label: 'Rencontrer 3–5 franchiseurs différents', detail: 'Jan-Pro, Kumon ou Subway recommandés' },
-      { id: 'p7t2', label: 'Parler à des franchisés existants', detail: 'Comprendre la réalité du business' },
-      { id: 'p7t3', label: 'Financement via BDC', detail: 'Banque de Développement du Canada' },
-      { id: 'p7t4', label: 'Ouvrir FRANCHISE INC. sous la Holding', detail: 'Protection légale isolée' },
-      { id: 'p7t5', label: 'Formation du franchiseur complétée', detail: '4–8 semaines' },
-      { id: 'p7t6', label: 'Ouverture officielle', detail: 'Revenus 150 000–300 000$/an' },
+      { id: 'p7t1', label: 'Accumuler 200 000–300 000$ pour mise de fonds', detail: 'Refinancements + cotisations des 2 groupes' },
+      { id: 'p7t2', label: 'Acheter immeuble 6–10 logements', detail: 'Financement commercial — moins dépendant du crédit personnel' },
+      { id: 'p7t3', label: 'Tes gars rénovent l\'immeuble entier', detail: 'Valeur ajoutée massive — refinancement possible' },
+      { id: 'p7t4', label: 'Cashflow 6 000–10 000$/mois net', detail: 'Machine à cash automatique' },
+      { id: 'p7t5', label: 'Engager un gestionnaire immobilier', detail: '8–10% des loyers — tu te libères du temps' },
     ]
   },
   {
-    phase: 'PHASE 8', titre: 'Empire 10M$+', mois: 'An 7–10', color: 'red',
+    phase: 'PHASE 8', titre: 'Franchise + Liberté', mois: 'An 6–8 (28–30 ans)', color: 'purple',
     taches: [
-      { id: 'p8t1', label: '8–12 propriétés dans le portefeuille', detail: 'Valeur 8–12M$' },
-      { id: 'p8t2', label: '4–5 franchises opérationnelles', detail: 'Revenus 500 000$+/an' },
-      { id: 'p8t3', label: 'Cashflow 60 000–80 000$/mois', detail: '6 000–8 000$/membre/mois' },
-      { id: 'p8t4', label: 'Valeur nette 1 200 000$+ par membre', detail: 'Liberté financière atteinte' },
+      { id: 'p8t1', label: 'Franchise dans la construction/rénovation', detail: 'Capitalise sur tes gars — exemple: franchise nettoyage ou réno' },
+      { id: 'p8t2', label: 'Ou franchise service (restauration rapide)', detail: 'Cash flow immédiat, financement BDC disponible' },
+      { id: 'p8t3', label: 'Ouvrir FRANCHISE INC. sous Alliance Patrimoine', detail: 'Structure légale isolée — protège tes biens' },
+      { id: 'p8t4', label: 'Revenus franchise: 150 000–300 000$/an', detail: 'S\'ajoute aux loyers immobiliers' },
     ]
-  }
+  },
+  {
+    phase: 'PHASE 9', titre: 'Retraite à 35 ans 🎯', mois: 'An 10–13 (32–35 ans)', color: 'red',
+    taches: [
+      { id: 'p9t1', label: '10–14 propriétés dans le portefeuille', detail: 'Valeur totale 4–6M$ avec les 2 groupes' },
+      { id: 'p9t2', label: 'Cashflow net 15 000–25 000$/mois total', detail: 'Loyers + franchise + dividendes' },
+      { id: 'p9t3', label: 'Ta part (20%+): 3 000–6 000$/mois passif', detail: 'Tu travailles plus si tu veux' },
+      { id: 'p9t4', label: 'Valeur nette personnelle: 1–2M$', detail: 'Millionnaire avant 35 ans ✓' },
+      { id: 'p9t5', label: 'Lancer Groupe 3 ou vendre tes parts', detail: 'Ou prendre ta retraite complète — ton choix' },
+    ]
+  },
 ];
 
 const colorMap = {
@@ -173,16 +187,16 @@ export default function PlanAction({ checklist, setChecklist }) {
         <h3 className="text-yellow-400 font-semibold mb-4">⚡ Les 10 commandements du groupe</h3>
         <div className="space-y-2">
           {[
-            'Les cotisations ne s\'arrêtent JAMAIS',
-            'Terme hypothécaire toujours 1–2 ans',
-            'Acheter seulement si les chiffres fonctionnent',
-            'Rénover DIY = économiser 50 000$+ par propriété',
-            'Garder les propriétés, ne jamais vendre',
+            'Les cotisations 1 000$/mois ne s\'arrêtent JAMAIS',
+            'Acheter seulement cheap — besoin de rénovations = profit',
+            'Tes gars de construction = ton avantage #1',
+            'Un membre habite dans chaque triplex → mise de fonds 5%',
+            'Refinancement après chaque rénovation — récupère ton argent',
+            'Garder les propriétés, ne JAMAIS vendre trop tôt',
             'Tout cashflow reste dans la compagnie jusqu\'à An 5',
-            'Réunion mensuelle obligatoire pour tous',
-            'CPA consulté chaque trimestre',
-            'Réserve d\'urgence 15 000$ toujours en banque',
-            'Décisions par vote majoritaire seulement',
+            'Acheter proche Montréal — l\'appréciation fait la richesse',
+            'Réunion mensuelle obligatoire — tous présents',
+            'Réserve d\'urgence 20 000$ toujours en banque',
           ].map((r, i) => (
             <div key={i} className="flex items-start gap-3">
               <span className="text-yellow-400 font-bold text-sm flex-shrink-0">{String(i + 1).padStart(2, '0')}</span>
