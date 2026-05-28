@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Users, Plus, Edit2, Check, X, Star } from 'lucide-react';
+import { Plus, Edit2, Check, X, Star, CheckCircle, Clock } from 'lucide-react';
 
 const roleColors = {
   'Gestionnaire': 'bg-yellow-500/20 text-yellow-400',
@@ -23,11 +23,31 @@ const getCreditLabel = (score) => {
   return 'À améliorer';
 };
 
-export default function Membres({ membres, setMembres }) {
+// Cotisation badge — shows Payé or En attente based on transactions
+function CotisationBadge({ membreId, transactions }) {
+  const moisStr = new Date().toISOString().substring(0, 7);
+  const paid = transactions?.some(
+    t => t.membreId === membreId && t.categorie === 'Cotisation' && t.date?.startsWith(moisStr)
+  );
+  if (paid) return (
+    <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black"
+      style={{ background: 'rgba(0,208,132,0.1)', color: '#00d084', border: '1px solid rgba(0,208,132,0.2)' }}>
+      <CheckCircle className="w-2.5 h-2.5" />Payé ✓
+    </span>
+  );
+  return (
+    <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black"
+      style={{ background: 'rgba(245,158,11,0.08)', color: '#f59e0b', border: '1px solid rgba(245,158,11,0.2)' }}>
+      <Clock className="w-2.5 h-2.5" />En attente
+    </span>
+  );
+}
+
+export default function Membres({ membres, setMembres, transactions = [] }) {
   const [editId, setEditId] = useState(null);
   const [editData, setEditData] = useState({});
   const [showAdd, setShowAdd] = useState(false);
-  const [newMembre, setNewMembre] = useState({ nom: '', cotisation: 750, creditScore: 700, role: 'Actionnaire' });
+  const [newMembre, setNewMembre] = useState({ nom: '', cotisation: 1000, role: 'Actionnaire' });
 
   const totalCotisation = membres.filter(m => m.actif).reduce((s, m) => s + m.cotisation, 0);
   const cotisationAnnuelle = totalCotisation * 12;
@@ -141,9 +161,9 @@ export default function Membres({ membres, setMembres }) {
                     <span className="text-white font-medium">{m.nom}</span>
                     <span className={`text-xs px-2 py-0.5 rounded-full ${roleColors[m.role] || roleColors['Actionnaire']}`}>{m.role}</span>
                   </div>
-                  <div className="flex items-center gap-3 mt-1 flex-wrap">
+                  <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                     <span className="text-emerald-400 text-sm font-medium">{m.cotisation}$/mois</span>
-                    <span className={`text-sm ${getCreditColor(m.creditScore)}`}>{m.creditScore} — {getCreditLabel(m.creditScore)}</span>
+                    <CotisationBadge membreId={m.id} transactions={transactions} />
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -176,15 +196,11 @@ export default function Membres({ membres, setMembres }) {
                   <input type="number" className="w-full bg-[#0a0a0a] border border-[#222] rounded-lg px-3 py-2 text-white" value={newMembre.cotisation} onChange={e => setNewMembre(p => ({ ...p, cotisation: +e.target.value }))} />
                 </div>
                 <div>
-                  <label className="text-slate-400 text-xs mb-1 block">Cote de crédit</label>
-                  <input type="number" className="w-full bg-[#0a0a0a] border border-[#222] rounded-lg px-3 py-2 text-white" value={newMembre.creditScore} onChange={e => setNewMembre(p => ({ ...p, creditScore: +e.target.value }))} />
+                  <label className="text-slate-400 text-xs mb-1 block">Rôle</label>
+                  <select className="w-full bg-[#0a0a0a] border border-[#222] rounded-lg px-3 py-2 text-white" value={newMembre.role} onChange={e => setNewMembre(p => ({ ...p, role: e.target.value }))}>
+                    {Object.keys(roleColors).map(r => <option key={r} value={r}>{r}</option>)}
+                  </select>
                 </div>
-              </div>
-              <div>
-                <label className="text-slate-400 text-xs mb-1 block">Rôle</label>
-                <select className="w-full bg-[#0a0a0a] border border-[#222] rounded-lg px-3 py-2 text-white" value={newMembre.role} onChange={e => setNewMembre(p => ({ ...p, role: e.target.value }))}>
-                  {Object.keys(roleColors).map(r => <option key={r} value={r}>{r}</option>)}
-                </select>
               </div>
             </div>
             <div className="flex gap-3 mt-5">

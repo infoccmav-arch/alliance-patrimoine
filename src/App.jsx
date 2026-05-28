@@ -26,6 +26,7 @@ import { ToastContainer, toast } from './components/Toast';
 import ConfettiCanvas, { fireConfetti } from './components/Confetti';
 import SearchModal     from './components/SearchModal';
 import PullToRefresh   from './components/PullToRefresh';
+import SplashScreen    from './components/SplashScreen';
 import { useSwipe }    from './hooks/useSwipe';
 import { haptic }      from './utils/haptic';
 import { useSharedData }   from './hooks/useSharedData';
@@ -223,7 +224,7 @@ function AppContent() {
 
   const PageContent = () => {
     if (tab==='dashboard')    return <Dashboard   membres={membres} proprietes={proprietes} franchises={franchises} capital={capital} transactions={transactions} onNavigate={navigate} />;
-    if (tab==='membres')      return <Membres     membres={membres} setMembres={setMembres} />;
+    if (tab==='membres')      return <Membres     membres={membres} setMembres={setMembres} transactions={transactions} />;
     if (tab==='proprietes')   return <Proprietes  proprietes={proprietes} setProprietes={setProprietes} setCapital={setCapital} />;
     if (tab==='franchises')   return <Franchises  franchises={franchises} setFranchises={setFranchises} />;
     if (tab==='finances')     return <Finances    membres={membres} capital={capital} setCapital={setCapital} transactions={transactions} setTransactions={setTransactions} />;
@@ -436,6 +437,16 @@ function AppContent() {
   );
 }
 
+function AppWithSplash() {
+  const [splashDone, setSplashDone] = useState(false);
+  return (
+    <>
+      {!splashDone && <SplashScreen onDone={() => setSplashDone(true)} />}
+      <AuthProvider><AppContent /></AuthProvider>
+    </>
+  );
+}
+
 export default function App() {
-  return <AuthProvider><AppContent /></AuthProvider>;
+  return <AppWithSplash />;
 }

@@ -1,29 +1,163 @@
 import { useState } from 'react';
-import { Building2, Plus, Hammer, X, Edit2, ChevronDown, ChevronUp, TrendingUp } from 'lucide-react';
-import Sparkline, { generateSparkData } from './Sparkline';
+import { Plus, Hammer, X, Edit2, TrendingUp, MapPin, ChevronRight } from 'lucide-react';
 
-const STATUS_DOT = {
-  'Recherche':  '#f59e0b',
-  'Offre faite':'#fb923c',
-  'Acheté':     '#a78bfa',
-  'Rénovation': '#c084fc',
-  'Refinancé':  '#00d084',
-  'Loué':       '#00d084',
+const STATUS_CONFIG = {
+  'Recherche':   { color: '#f59e0b', bg: 'rgba(245,158,11,0.12)',  icon: '🔍', label: 'Recherche'     },
+  'Offre faite': { color: '#fb923c', bg: 'rgba(251,146,60,0.12)',  icon: '📋', label: 'Offre faite'   },
+  'Acheté':      { color: '#a78bfa', bg: 'rgba(167,139,250,0.12)', icon: '🔑', label: 'Acheté'        },
+  'Rénovation':  { color: '#c084fc', bg: 'rgba(192,132,252,0.12)', icon: '🔨', label: 'En rénovation' },
+  'Refinancé':   { color: '#00d084', bg: 'rgba(0,208,132,0.12)',   icon: '✅', label: 'Refinancé'     },
+  'Loué':        { color: '#00d084', bg: 'rgba(0,208,132,0.12)',   icon: '🏠', label: 'Loué'          },
 };
 
-const STATUS_LABEL = {
-  'Recherche':  'Recherche',
-  'Offre faite':'Offre faite',
-  'Acheté':     'Acheté',
-  'Rénovation': 'Rénovation',
-  'Refinancé':  'Refinancé ✓',
-  'Loué':       'Loué',
+const TYPE_EMOJI = {
+  'Maison':'🏡','Duplex':'🏘️','Triplex':'🏢','Quadruplex':'🏢',
+  'Immeuble à revenus':'🏬','Commercial':'🏪',
 };
 
 const fmtM = (v) => v ? `${Number(v).toLocaleString('fr-CA')} $` : '—';
+const fmtK = (v) => {
+  const n = Number(v); if (!n) return '—';
+  return n >= 1_000_000 ? `${(n/1_000_000).toFixed(1)}M$` : n >= 1000 ? `${(n/1000).toFixed(0)}k$` : `${n}$`;
+};
 
-const INPUT  = { background: '#111', border: '1px solid #1f1f1f', color: '#fff', borderRadius: 12, padding: '10px 14px', fontSize: 13, width: '100%', outline: 'none' };
-const LABEL  = { fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#3a3a3a', marginBottom: 5, display: 'block' };
+const INPUT = { background: '#111', border: '1px solid #1f1f1f', color: '#fff', borderRadius: 12, padding: '10px 14px', fontSize: 13, width: '100%', outline: 'none' };
+const LABEL = { fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#3a3a3a', marginBottom: 5, display: 'block' };
+
+function PropCard({ p, index, onEdit, onDelete }) {
+  const [expanded, setExpanded] = useState(false);
+  const valeur  = +p.valeurActuelle || +p.prixAchat || 0;
+  const hypo    = +p.hypotheque || 0;
+  const nette   = valeur - hypo;
+  const cf      = +p.cashflow || 0;
+  const isPos   = cf >= 0;
+  const status  = STATUS_CONFIG[p.status] || STATUS_CONFIG['Acheté'];
+  const emoji   = TYPE_EMOJI[p.type] || '🏠';
+  const gain    = valeur - (+p.prixAchat || 0);
+  const gainPct = p.prixAchat && +p.prixAchat > 0 ? ((gain / +p.prixAchat) * 100) : 0;
+  const brrrr   = p.valeurActuelle && p.hypotheque ? Math.max(0, (+p.valeurActuelle * 0.8) - +p.hypotheque) : 0;
+
+  return (
+    <div className="fade-up rounded-3xl overflow-hidden"
+      style={{ background:'#0a0a0a', border:'1px solid rgba(255,255,255,0.06)', animationDelay:`${index*60}ms` }}>
+
+      {/* Coloured header */}
+      <div className="relative px-5 pt-5 pb-4"
+        style={{ background:`linear-gradient(135deg, ${status.bg} 0%, rgba(0,0,0,0) 80%)` }}>
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <span className="text-2xl leading-none">{emoji}</span>
+            <div>
+              <p className="text-white font-bold text-sm leading-tight">
+                {p.adresse ? p.adresse.split(',')[0] : `Propriété ${index+1}`}
+              </p>
+              {p.ville && (
+                <div className="flex items-center gap-1 mt-0.5">
+                  <MapPin className="w-2.5 h-2.5" style={{ color:'#444' }} />
+                  <p className="text-[10px]" style={{ color:'#555' }}>{p.ville}</p>
+                </div>
+              )}
+            </div>
+          </div>
+          <span className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black flex-shrink-0"
+            style={{ background:status.bg, color:status.color, border:`1px solid ${status.color}30` }}>
+            {status.icon} {status.label}
+          </span>
+        </div>
+
+        <div className="flex items-end justify-between">
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-widest mb-1" style={{ color:'#444' }}>Valeur actuelle</p>
+            <p className="text-3xl font-black num text-white leading-none">{fmtK(valeur || 0)}</p>
+            {gainPct !== 0 && (
+              <p className="text-xs font-bold num mt-1" style={{ color: gain>=0?'#00d084':'#ff4d4d' }}>
+                {gain>=0?'+':''}{fmtK(gain)} ({gainPct>=0?'+':''}{gainPct.toFixed(1)}%)
+              </p>
+            )}
+          </div>
+          {cf !== 0 && (
+            <div className="text-right">
+              <p className="text-[10px] font-semibold uppercase tracking-widest mb-1" style={{ color:'#444' }}>Cashflow</p>
+              <div className="px-3 py-1.5 rounded-xl"
+                style={{ background:isPos?'rgba(0,208,132,0.1)':'rgba(255,77,77,0.1)', border:`1px solid ${isPos?'rgba(0,208,132,0.2)':'rgba(255,77,77,0.2)'}` }}>
+                <p className="text-base font-black num" style={{ color:isPos?'#00d084':'#ff4d4d' }}>
+                  {isPos?'+':''}{cf.toLocaleString('fr-CA')} $/m
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Metrics row */}
+      <div className="grid grid-cols-3 gap-px" style={{ background:'rgba(255,255,255,0.04)' }}>
+        {[
+          { label:'Prix achat',   value:fmtK(p.prixAchat),   color:'#888'    },
+          { label:'Valeur nette', value:fmtK(nette),          color:'#00d084' },
+          { label:'Hypothèque',   value:fmtK(p.hypotheque),  color:'#818cf8' },
+        ].map(({ label, value, color }) => (
+          <div key={label} className="px-3 py-3 text-center" style={{ background:'#0a0a0a' }}>
+            <p className="text-[9px] font-bold uppercase tracking-wider" style={{ color:'#333' }}>{label}</p>
+            <p className="text-sm font-black num mt-0.5" style={{ color }}>{value}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* BRRRR chip */}
+      {brrrr > 0 && (
+        <div className="mx-4 my-3 flex items-center gap-2 px-3 py-2.5 rounded-xl"
+          style={{ background:'rgba(0,208,132,0.06)', border:'1px solid rgba(0,208,132,0.1)' }}>
+          <TrendingUp className="w-3.5 h-3.5 flex-shrink-0" style={{ color:'#00d084' }} strokeWidth={2} />
+          <p className="text-xs flex-1" style={{ color:'#555' }}>Capital récupérable (BRRRR 80%)</p>
+          <p className="text-sm font-black num" style={{ color:'#00d084' }}>{fmtK(brrrr)}</p>
+        </div>
+      )}
+
+      {/* Expand toggle */}
+      <button onClick={() => setExpanded(e => !e)}
+        className="w-full flex items-center justify-between px-5 py-3 transition"
+        style={{ borderTop:'1px solid rgba(255,255,255,0.04)', color:'#3a3a3a' }}
+        onMouseEnter={e=>e.currentTarget.style.background='rgba(255,255,255,0.02)'}
+        onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
+        <span className="text-[10px] font-bold uppercase tracking-widest">Détails & actions</span>
+        <ChevronRight className="w-3.5 h-3.5 transition-transform" style={{ transform:expanded?'rotate(90deg)':'none' }} />
+      </button>
+
+      {expanded && (
+        <div className="px-5 pb-5 space-y-3">
+          <div className="grid grid-cols-3 gap-2">
+            {[
+              { label:'Mise de fonds', value:fmtM(p.miseDefonds) },
+              { label:'Taux intérêt',  value:p.tauxInteret?`${p.tauxInteret}%`:'—' },
+              { label:'Coût réno',     value:fmtM(p.coutRenovation) },
+              { label:'Revenu loc.',   value:fmtM(p.revenuLocatif), color:'#00d084' },
+              { label:'Dépenses/m',    value:fmtM(p.depenses),      color:'#ff4d4d' },
+              { label:'Type',          value:p.type||'—' },
+            ].map(({ label, value, color }) => (
+              <div key={label} className="rounded-xl px-3 py-2.5" style={{ background:'#111', border:'1px solid rgba(255,255,255,0.04)' }}>
+                <p className="text-[9px] font-bold uppercase tracking-wider" style={{ color:'#333' }}>{label}</p>
+                <p className="text-xs font-bold num mt-0.5" style={{ color:color||'#666' }}>{value}</p>
+              </div>
+            ))}
+          </div>
+          {p.notes && <p className="text-xs leading-relaxed px-1" style={{ color:'#555' }}>{p.notes}</p>}
+          <div className="flex gap-2 pt-1">
+            <button onClick={() => onEdit(p)}
+              className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold transition active:scale-95"
+              style={{ background:'rgba(245,158,11,0.08)', color:'#f59e0b', border:'1px solid rgba(245,158,11,0.15)' }}>
+              <Edit2 className="w-3 h-3" /> Modifier
+            </button>
+            <button onClick={() => onDelete(p.id)}
+              className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold transition active:scale-95"
+              style={{ background:'rgba(255,77,77,0.06)', color:'#ff4d4d', border:'1px solid rgba(255,77,77,0.12)' }}>
+              <X className="w-3 h-3" /> Supprimer
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 const emptyProp = {
   adresse: '', ville: '', type: 'Maison', status: 'Recherche',
@@ -33,10 +167,9 @@ const emptyProp = {
 };
 
 export default function Proprietes({ proprietes, setProprietes, setCapital }) {
-  const [showAdd, setShowAdd]   = useState(false);
-  const [form, setForm]         = useState(emptyProp);
-  const [editId, setEditId]     = useState(null);
-  const [expandId, setExpandId] = useState(null);
+  const [showAdd, setShowAdd] = useState(false);
+  const [form, setForm]       = useState(emptyProp);
+  const [editId, setEditId]   = useState(null);
 
   const totalValeur    = proprietes.reduce((s, p) => s + (+p.valeurActuelle || +p.prixAchat || 0), 0);
   const totalHypo      = proprietes.reduce((s, p) => s + (+p.hypotheque || 0), 0);
@@ -99,7 +232,7 @@ export default function Proprietes({ proprietes, setProprietes, setCapital }) {
         Ajouter une propriété
       </button>
 
-      {/* ── Property list — Wealthsimple asset card style ── */}
+      {/* ── Gallery ── */}
       {proprietes.length === 0 ? (
         <div className="py-16 text-center fade-up flex flex-col items-center gap-4">
           <div className="w-20 h-20 rounded-3xl flex items-center justify-center text-4xl"
@@ -120,122 +253,10 @@ export default function Proprietes({ proprietes, setProprietes, setCapital }) {
           </button>
         </div>
       ) : (
-        <div>
-          {proprietes.map((p, i) => {
-            const valeur   = +p.valeurActuelle || +p.prixAchat || 0;
-            const hypo     = +p.hypotheque || 0;
-            const nette    = valeur - hypo;
-            const cf       = +p.cashflow || 0;
-            const isPos    = cf >= 0;
-            const dotColor = STATUS_DOT[p.status] || '#5a5a5a';
-            const expanded = expandId === p.id;
-            const spark    = generateSparkData(p.id || i + 300, 14, 1.5);
-
-            return (
-              <div key={p.id}>
-                {/* Main row */}
-                <button onClick={() => setExpandId(expanded ? null : p.id)}
-                  className="w-full flex items-center gap-4 py-4 text-left transition-all duration-150"
-                  style={{ borderBottom: expanded ? 'none' : '1px solid rgba(255,255,255,0.04)', background: 'transparent' }}>
-
-                  {/* Icon circle */}
-                  <div className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-base"
-                    style={{ background: 'rgba(129,140,248,0.12)' }}>
-                    🏠
-                  </div>
-
-                  {/* Info */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1.5">
-                      <p className="text-sm font-semibold text-white truncate">
-                        {p.adresse ? p.adresse.split(',')[0] : `Propriété ${i + 1}`}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-1.5 mt-0.5">
-                      <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: dotColor }} />
-                      <p className="text-xs truncate" style={{ color: '#5a5a5a' }}>
-                        {p.ville || ''}{p.ville ? ' · ' : ''}{STATUS_LABEL[p.status] || p.status}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Sparkline */}
-                  <div className="flex-shrink-0 opacity-70">
-                    <Sparkline data={spark} positive={isPos} width={52} height={22} />
-                  </div>
-
-                  {/* Value */}
-                  <div className="flex-shrink-0 text-right">
-                    <p className="text-sm font-bold num text-white">{fmtM(valeur)}</p>
-                    <p className="text-xs font-semibold num mt-0.5" style={{ color: isPos ? '#00d084' : '#ff4d4d' }}>
-                      {cf !== 0 ? `${isPos ? '+' : ''}${cf.toLocaleString('fr-CA')} $/m` : '—'}
-                    </p>
-                  </div>
-                </button>
-
-                {/* Expanded detail */}
-                {expanded && (
-                  <div className="pb-4 mb-1" style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                    <div className="rounded-2xl p-4 space-y-3"
-                      style={{ background: '#0d0d0d', border: '1px solid rgba(255,255,255,0.05)' }}>
-
-                      {/* Key metrics */}
-                      <div className="grid grid-cols-3 gap-2">
-                        {[
-                          { label: 'Prix achat', value: fmtM(p.prixAchat) },
-                          { label: 'Valeur actuelle', value: fmtM(p.valeurActuelle || p.prixAchat), color: '#f59e0b' },
-                          { label: 'Valeur nette',    value: fmtM(nette), color: '#00d084' },
-                          { label: 'Hypothèque',      value: fmtM(p.hypotheque) },
-                          { label: 'Mise de fonds',   value: fmtM(p.miseDefonds) },
-                          { label: 'Taux intérêt',    value: p.tauxInteret ? `${p.tauxInteret}%` : '—' },
-                        ].map(item => (
-                          <div key={item.label} className="py-2">
-                            <p className="text-[9px] font-bold uppercase tracking-widest" style={{ color: '#3a3a3a' }}>{item.label}</p>
-                            <p className="text-sm font-bold num mt-0.5" style={{ color: item.color || '#888' }}>{item.value}</p>
-                          </div>
-                        ))}
-                      </div>
-
-                      {/* Refinancement BRRRR */}
-                      {p.valeurActuelle && p.hypotheque && (
-                        <div className="rounded-xl p-3"
-                          style={{ background: 'rgba(0,208,132,0.06)', border: '1px solid rgba(0,208,132,0.12)' }}>
-                          <div className="flex items-center gap-1.5 mb-2">
-                            <TrendingUp className="w-3.5 h-3.5" style={{ color: '#00d084' }} strokeWidth={2} />
-                            <p className="text-xs font-bold" style={{ color: '#00d084' }}>Refinancement BRRRR (80%)</p>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <p className="text-xs" style={{ color: '#5a5a5a' }}>Capital récupérable</p>
-                            <p className="text-sm font-black num" style={{ color: '#00d084' }}>
-                              {fmtM(Math.max(0, (+p.valeurActuelle * 0.8) - +p.hypotheque))}
-                            </p>
-                          </div>
-                        </div>
-                      )}
-
-                      {p.notes && (
-                        <p className="text-xs leading-relaxed" style={{ color: '#5a5a5a' }}>{p.notes}</p>
-                      )}
-
-                      {/* Actions */}
-                      <div className="flex gap-2 pt-1">
-                        <button onClick={() => handleEdit(p)}
-                          className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition active:scale-95"
-                          style={{ background: 'rgba(245,158,11,0.08)', color: '#f59e0b', border: '1px solid rgba(245,158,11,0.15)' }}>
-                          <Edit2 className="w-3 h-3" /> Modifier
-                        </button>
-                        <button onClick={() => handleDelete(p.id)}
-                          className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition active:scale-95"
-                          style={{ background: 'rgba(255,77,77,0.07)', color: '#ff4d4d', border: '1px solid rgba(255,77,77,0.12)' }}>
-                          <X className="w-3 h-3" /> Supprimer
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
+        <div className="space-y-4">
+          {proprietes.map((p, i) => (
+            <PropCard key={p.id} p={p} index={i} onEdit={handleEdit} onDelete={handleDelete} />
+          ))}
         </div>
       )}
 
