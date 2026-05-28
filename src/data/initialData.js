@@ -1,14 +1,11 @@
 export const initialMembers = [
-  { id: 1, nom: "Membre 1", cotisation: 750, creditScore: 720, role: "Gestionnaire", actif: true, totalCotise: 0 },
-  { id: 2, nom: "Membre 2", cotisation: 750, creditScore: 695, role: "Trésorier", actif: true, totalCotise: 0 },
-  { id: 3, nom: "Membre 3", cotisation: 750, creditScore: 740, role: "Chef de chantier", actif: true, totalCotise: 0 },
-  { id: 4, nom: "Membre 4", cotisation: 750, creditScore: 680, role: "Secrétaire", actif: true, totalCotise: 0 },
-  { id: 5, nom: "Membre 5", cotisation: 750, creditScore: 710, role: "Actionnaire", actif: true, totalCotise: 0 },
-  { id: 6, nom: "Membre 6", cotisation: 750, creditScore: 650, role: "Actionnaire", actif: true, totalCotise: 0 },
-  { id: 7, nom: "Membre 7", cotisation: 750, creditScore: 760, role: "Actionnaire", actif: true, totalCotise: 0 },
-  { id: 8, nom: "Membre 8", cotisation: 750, creditScore: 700, role: "Actionnaire", actif: true, totalCotise: 0 },
-  { id: 9, nom: "Membre 9", cotisation: 750, creditScore: 730, role: "Actionnaire", actif: true, totalCotise: 0 },
-  { id: 10, nom: "Membre 10", cotisation: 750, creditScore: 670, role: "Actionnaire", actif: true, totalCotise: 0 },
+  { id: 1, nom: "Membre 1", cotisation: 1000, role: "Gestionnaire",   actif: true, totalCotise: 0 },
+  { id: 2, nom: "Membre 2", cotisation: 1000, role: "Trésorier",      actif: true, totalCotise: 0 },
+  { id: 3, nom: "Membre 3", cotisation: 1000, role: "Chef de chantier",actif: true, totalCotise: 0 },
+  { id: 4, nom: "Membre 4", cotisation: 1000, role: "Secrétaire",     actif: true, totalCotise: 0 },
+  { id: 5, nom: "Membre 5", cotisation: 1000, role: "Actionnaire",    actif: true, totalCotise: 0 },
+  { id: 6, nom: "Membre 6", cotisation: 1000, role: "Actionnaire",    actif: true, totalCotise: 0 },
+  { id: 7, nom: "Membre 7", cotisation: 1000, role: "Actionnaire",    actif: true, totalCotise: 0 },
 ];
 
 export const initialProperties = [
