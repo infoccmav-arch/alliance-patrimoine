@@ -3,7 +3,7 @@ import {
   LayoutDashboard, Building2, CheckSquare, MessageCircle,
   Calculator, LogOut, Shield, ChevronRight,
   FileText, Wallet, User, FileDown, Search,
-  WifiOff, Wifi, CloudUpload,
+  WifiOff, Wifi, CloudUpload, Vote,
 } from 'lucide-react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import LoginPage       from './components/LoginPage';
@@ -27,6 +27,7 @@ import ConfettiCanvas, { fireConfetti } from './components/Confetti';
 import SearchModal     from './components/SearchModal';
 import PullToRefresh   from './components/PullToRefresh';
 import SplashScreen    from './components/SplashScreen';
+import Votes           from './components/Votes';
 import { useSwipe }    from './hooks/useSwipe';
 import { haptic }      from './utils/haptic';
 import { useSharedData }   from './hooks/useSharedData';
@@ -38,7 +39,7 @@ import './index.css';
 const ALL_TABS = [
   { id:'dashboard',    label:'Accueil',  icon:LayoutDashboard, adminOnly:false },
   { id:'proprietes',   label:'Immo',     icon:Building2,       adminOnly:false },
-  { id:'calculatrice', label:'Calcul',   icon:Calculator,      adminOnly:false },
+  { id:'votes',        label:'Votes',    icon:Vote,            adminOnly:false },
   { id:'discussion',   label:'Chat',     icon:MessageCircle,   adminOnly:false },
   { id:'plan',         label:'Plan',     icon:CheckSquare,     adminOnly:true  },
 ];
@@ -168,9 +169,13 @@ function AppContent() {
   const [capital,      setCapital]      = useSharedData('capital',      0);
   const [checklist,    setChecklist]    = useSharedData('checklist',    {});
   const [documents,    setDocuments]    = useSharedData('documents',    []);
+  const [votes,        setVotes]        = useSharedData('votes',        []);
 
   const unread = useChatUnread(tab);
   useMilestone(capital);
+
+  // Active vote count badge
+  const activeVotes = (votes || []).filter(v => v.status === 'active').length;
 
   useEffect(() => {
     const h = (e) => { if ((e.metaKey||e.ctrlKey) && e.key==='k') { e.preventDefault(); setSearch(true); } };
@@ -214,6 +219,7 @@ function AppContent() {
     membres:      ['Équipe',              'Les actionnaires du groupe'],
     franchises:   ['Franchises',          'Vos entreprises en franchise'],
     discussion:   ['Discussion',          'Partagez des opportunités'],
+    votes:        ['Votes',               'Proposez et votez sur les immeubles'],
     calculatrice: ['Calculatrice',        'Simulez votre hypothèque'],
     plan:         ["Plan d'action",       'Étapes vers la liberté financière'],
     comptes:      ['Comptes',             'Gestion des accès'],
@@ -229,6 +235,7 @@ function AppContent() {
     if (tab==='franchises')   return <Franchises  franchises={franchises} setFranchises={setFranchises} />;
     if (tab==='finances')     return <Finances    membres={membres} capital={capital} setCapital={setCapital} transactions={transactions} setTransactions={setTransactions} />;
     if (tab==='discussion')   return <Discussion />;
+    if (tab==='votes')        return <Votes votes={votes} setVotes={setVotes} membres={membres} />;
     if (tab==='calculatrice') return <Calculatrice />;
     if (tab==='documents')    return <Documents   documents={documents} setDocuments={setDocuments} />;
     if (tab==='profil')       return <Profil      membres={membres} transactions={transactions} proprietes={proprietes} capital={capital} />;
@@ -291,6 +298,11 @@ function AppContent() {
                   {t.id==='discussion' && unread>0 && (
                     <span className="absolute -top-1.5 -right-1.5 min-w-[14px] h-3.5 rounded-full flex items-center justify-center text-[8px] font-black text-white" style={{ background:'#ef4444', padding:'0 2px', boxShadow:'0 0 0 1.5px #080808' }}>
                       {unread>9?'9+':unread}
+                    </span>
+                  )}
+                  {t.id==='votes' && activeVotes>0 && (
+                    <span className="absolute -top-1.5 -right-1.5 min-w-[14px] h-3.5 rounded-full flex items-center justify-center text-[8px] font-black text-white" style={{ background:'#3b82f6', padding:'0 2px', boxShadow:'0 0 0 1.5px #080808' }}>
+                      {activeVotes}
                     </span>
                   )}
                 </div>
@@ -423,6 +435,12 @@ function AppContent() {
                       <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 rounded-full flex items-center justify-center text-[9px] font-black text-white z-20"
                         style={{ background:'#ef4444', padding:'0 3px', boxShadow:'0 0 0 2px #000' }}>
                         {unread>9?'9+':unread}
+                      </span>
+                    )}
+                    {t.id==='votes' && activeVotes>0 && (
+                      <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 rounded-full flex items-center justify-center text-[9px] font-black text-white z-20"
+                        style={{ background:'#3b82f6', padding:'0 3px', boxShadow:'0 0 0 2px #000' }}>
+                        {activeVotes}
                       </span>
                     )}
                   </div>
